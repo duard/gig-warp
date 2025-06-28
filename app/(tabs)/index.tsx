@@ -23,10 +23,10 @@ export default function HomeScreen() {
         
         <TouchableOpacity 
           style={[styles.featureButton, styles.secondaryButton]}
-          onPress={() => router.push('/(tabs)/checklist')}
+          onPress={() => router.push('/features/todos')}
         >
-          <FontAwesome name="list" size={24} color="#007AFF" />
-          <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Checklists</Text>
+          <FontAwesome name="check-square-o" size={24} color="#007AFF" />
+          <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Todos</Text>
           <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Manage Your Tasks</Text>
         </TouchableOpacity>
       </View>

@@ -1,21 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/database';
-import { observable, syncedSupabase, configureSynced } from '@legendapp/state';
+import { observable } from '@legendapp/state';
+import { syncedSupabase } from '@legendapp/state/sync-plugins/supabase';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import { configureSynced } from '@legendapp/state/sync';
 import { ObservablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and Anon Key must be provided.');
-}
+import { Database } from '../../../types/database';
 
 const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey
+  process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 // Provide a function to generate ids locally
@@ -44,7 +39,7 @@ export const todos$ = observable(
     collection: 'todos',
     select: (from: any) =>
       from
-        .select('id,counter,text,done,created_at,updated_at,deleted')
+        .select('id,text,done,created_at,updated_at,deleted')
         .order('updated_at', { ascending: false }),
     actions: ['read', 'create', 'update', 'delete'],
     realtime: true,
@@ -91,17 +86,4 @@ export function hardDeleteTodo(id: string) {
 // Restore a soft-deleted todo
 export function restoreTodo(id: string) {
   todos$[id].deleted.set(false);
-}
-
-export function testSupabaseRealtime() {
-  supabase
-    .channel('todos-changes')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'todos' },
-      (payload) => {
-        console.log('Realtime change from Supabase:', payload);
-      }
-    )
-    .subscribe();
 }
