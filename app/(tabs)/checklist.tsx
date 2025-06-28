@@ -3,25 +3,23 @@ import { StyleSheet, TextInput, TouchableOpacity, FlatList, Alert } from 'react-
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useObservable } from '@legendapp/state/react';
 
-import { useSupabase } from '../../providers/SupabaseProvider';
-import { useTodos } from '../../hooks/useTodos';
-import { Todo } from '../../types/database';
+
+import { todos$, addTodo, toggleDone, hardDeleteTodo, testSupabaseRealtime } from '../../features/checklists/services/todoService';
 import { debugSupabaseConnection } from '../../utils/debugSupabase';
 
 export default function ChecklistScreen() {
-  const { user } = useSupabase();
-  const { todos, addTodo, updateTodo, deleteTodo } = useTodos();
+  const todos = useObservable(todos$);
   const [newTodoTitle, setNewTodoTitle] = useState('');
 
   useFocusEffect(
     React.useCallback(() => {
       console.log('Checklist screen focused');
-      if (user) {
-        console.log('User authenticated, current todos count:', todos.length);
-        debugSupabaseConnection();
-      }
-    }, [user, todos.length])
+      console.log('Current todos count:', todos.length);
+      debugSupabaseConnection();
+      testSupabaseRealtime(); // Start listening for realtime changes
+    }, [todos.length])
   );
 
   const handleDebug = async () => {
@@ -34,26 +32,18 @@ export default function ChecklistScreen() {
     );
   };
 
-  const handleAddTodo = async () => {
-    if (newTodoTitle.trim() && user) {
-      try {
-        await addTodo({ text: newTodoTitle.trim() });
-        setNewTodoTitle('');
-      } catch (error) {
-        Alert.alert('Error', 'Failed to add todo');
-      }
+  const handleAddTodo = () => {
+    if (newTodoTitle.trim()) {
+      addTodo(newTodoTitle.trim());
+      setNewTodoTitle('');
     }
   };
 
-  const handleToggleComplete = async (todo: Todo) => {
-    try {
-      await updateTodo(todo.id, { done: !todo.done });
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update todo');
-    }
+  const handleToggleComplete = (todo: typeof todos[0]) => {
+    toggleDone(todo.id);
   };
 
-  const handleDeleteTodo = (todo: Todo) => {
+  const handleDeleteTodo = (todo: typeof todos[0]) => {
     Alert.alert(
       'Delete Todo',
       `Are you sure you want to delete "${todo.text}"?`,
@@ -62,13 +52,13 @@ export default function ChecklistScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteTodo(todo.id),
+          onPress: () => hardDeleteTodo(todo.id),
         },
       ]
     );
   };
 
-  const renderTodoItem = ({ item }: { item: Todo }) => (
+  const renderTodoItem = ({ item }: { item: typeof todos[0] }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity
         style={[styles.checkbox, item.done && styles.checkboxCompleted]}
@@ -88,14 +78,7 @@ export default function ChecklistScreen() {
     </View>
   );
 
-  if (!user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>My Todos</Text>
-        <Text style={styles.loginMessage}>Please log in to view your todos</Text>
-      </View>
-    );
-  }
+  
 
   return (
     <View style={styles.container}>
@@ -121,7 +104,7 @@ export default function ChecklistScreen() {
       </View>
 
       <FlatList
-        data={todos}
+        data={Object.values(todos)}
         renderItem={renderTodoItem}
         keyExtractor={(item) => item.id}
         style={styles.list}
@@ -130,11 +113,11 @@ export default function ChecklistScreen() {
 
       <View style={styles.stats}>
         <Text style={styles.statsText}>
-          {todos.filter(todo => todo.done).length} of {todos.length} completed
+          {Object.values(todos).filter(todo => todo.done).length} of {Object.values(todos).length} completed
         </Text>
       </View>
 
-      {todos.length === 0 && (
+      {Object.values(todos).length === 0 && (
         <View style={styles.emptyState}>
           <FontAwesome name="check-circle-o" size={64} color="#ccc" />
           <Text style={styles.emptyText}>No todos yet</Text>

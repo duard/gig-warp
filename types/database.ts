@@ -4,30 +4,30 @@ export interface Database {
       todos: {
         Row: {
           id: string;
-          counter: number;
-          text: string;
-          done: boolean;
           created_at: string;
-          updated_at: string;
-          deleted: boolean;
+          title: string;
+          description: string | null;
+          completed: boolean;
+          due_date: string | null;
+          priority: 'low' | 'medium' | 'high' | null;
         };
         Insert: {
           id?: string;
-          counter?: number;
-          text: string;
-          done?: boolean;
           created_at?: string;
-          updated_at?: string;
-          deleted?: boolean;
+          title: string;
+          description?: string | null;
+          completed?: boolean;
+          due_date?: string | null;
+          priority?: 'low' | 'medium' | 'high' | null;
         };
         Update: {
           id?: string;
-          counter?: number;
-          text?: string;
-          done?: boolean;
           created_at?: string;
-          updated_at?: string;
-          deleted?: boolean;
+          title?: string;
+          description?: string | null;
+          completed?: boolean;
+          due_date?: string | null;
+          priority?: 'low' | 'medium' | 'high' | null;
         };
       };
     };

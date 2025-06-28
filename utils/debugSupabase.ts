@@ -10,12 +10,10 @@ export const debugSupabaseConnection = async () => {
   
   try {
     // Test basic connection
-    const { data, error } = await supabase
-      .from('todos')
-      .select('count(*)', { count: 'exact', head: true });
-    
+    const { data, error } = await supabase.from('todos').select('*').limit(1);
+
     if (error) {
-      console.error('❌ Supabase connection error:', error);
+      console.error('❌ Supabase connection error:', JSON.stringify(error, null, 2));
       return { success: false, error };
     }
     
@@ -34,11 +32,9 @@ export const debugSupabaseConnection = async () => {
       console.log('👤 Current user:', session.user.email);
       console.log('🆔 User ID:', session.user.id);
       
-      // Test user-specific todos
       const { data: userTodos, error: userTodosError } = await supabase
         .from('todos')
-        .select('*')
-        .eq('user_id', session.user.id);
+        .select('*');
       
       if (userTodosError) {
         console.error('❌ User todos error:', userTodosError);

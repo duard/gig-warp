@@ -21,7 +21,6 @@ export const useTodos = () => {
     const { data, error } = await supabase
       .from('todos')
       .select('*')
-      .eq('deleted', false) // Only get non-deleted todos
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -33,18 +32,16 @@ export const useTodos = () => {
     }
   };
 
-  const addTodo = async (newTodo: { text: string }) => {
+  const addTodo = async (newTodo: { title: string }) => {
     if (!user) return;
     
-    console.log('➕ Adding new todo:', newTodo.text);
+    console.log('➕ Adding new todo:', newTodo.title);
     
     const { data, error } = await supabase
       .from('todos')
       .insert([{ 
-        text: newTodo.text,
-        done: false,
-        deleted: false,
-        updated_at: new Date().toISOString()
+        title: newTodo.title,
+        completed: false
       }])
       .select();
 
@@ -57,15 +54,12 @@ export const useTodos = () => {
     }
   };
 
-  const updateTodo = async (id: string, update: { done?: boolean; text?: string }) => {
+  const updateTodo = async (id: string, update: { completed?: boolean; title?: string }) => {
     console.log('🔄 Updating todo:', id, update);
     
     const { error } = await supabase
       .from('todos')
-      .update({ 
-        ...update,
-        updated_at: new Date().toISOString()
-      })
+      .update(update)
       .eq('id', id);
 
     if (error) {
@@ -78,15 +72,11 @@ export const useTodos = () => {
   };
 
   const deleteTodo = async (id: string) => {
-    console.log('🗑️ Soft deleting todo:', id);
+    console.log('🗑️ Deleting todo:', id);
     
-    // Soft delete by setting deleted = true
     const { error } = await supabase
       .from('todos')
-      .update({ 
-        deleted: true,
-        updated_at: new Date().toISOString()
-      })
+      .delete()
       .eq('id', id);
 
     if (error) {
