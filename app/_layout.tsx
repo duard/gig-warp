@@ -4,9 +4,12 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { View, Text } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { SupabaseProvider, useSupabase } from '@/providers/SupabaseProvider';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -45,15 +48,36 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-function RootLayoutNav() {
+function AuthenticatedLayout() {
+  const { user, loading } = useSupabase();
   const colorScheme = useColorScheme();
+  
+  // Use the auth redirect hook
+  useAuthRedirect();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="auth" />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
+  );
+}
+
+function RootLayoutNav() {
+  return (
+    <SupabaseProvider>
+      <AuthenticatedLayout />
+    </SupabaseProvider>
   );
 }

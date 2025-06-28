@@ -2,104 +2,145 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
-interface ChecklistItem {
-  id: string;
-  text: string;
-  completed: boolean;
-}
+import { useSupabase } from '../../providers/SupabaseProvider';
+import { useTodos } from '../../hooks/useTodos';
+import { Todo } from '../../types/database';
+import { debugSupabaseConnection } from '../../utils/debugSupabase';
 
 export default function ChecklistScreen() {
-  const [items, setItems] = useState<ChecklistItem[]>([
-    { id: '1', text: 'Set up Supabase', completed: true },
-    { id: '2', text: 'Create navigation tabs', completed: true },
-    { id: '3', text: 'Add checklist functionality', completed: false },
-    { id: '4', text: 'Implement profile screen', completed: false },
-  ]);
-  const [newItemText, setNewItemText] = useState('');
+  const { user } = useSupabase();
+  const { todos, addTodo, updateTodo, deleteTodo } = useTodos();
+  const [newTodoTitle, setNewTodoTitle] = useState('');
 
-  const addItem = () => {
-    if (newItemText.trim()) {
-      const newItem: ChecklistItem = {
-        id: Date.now().toString(),
-        text: newItemText.trim(),
-        completed: false,
-      };
-      setItems([...items, newItem]);
-      setNewItemText('');
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('Checklist screen focused');
+      if (user) {
+        console.log('User authenticated, current todos count:', todos.length);
+        debugSupabaseConnection();
+      }
+    }, [user, todos.length])
+  );
+
+  const handleDebug = async () => {
+    console.log('🔧 Manual debug triggered');
+    const result = await debugSupabaseConnection();
+    Alert.alert(
+      'Debug Results',
+      `Connection: ${result.success ? 'Success' : 'Failed'}\nUser todos: ${result.userTodos?.length || 0}`,
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleAddTodo = async () => {
+    if (newTodoTitle.trim() && user) {
+      try {
+        await addTodo({ text: newTodoTitle.trim() });
+        setNewTodoTitle('');
+      } catch (error) {
+        Alert.alert('Error', 'Failed to add todo');
+      }
     }
   };
 
-  const toggleItem = (id: string) => {
-    setItems(items.map(item =>
-      item.id === id ? { ...item, completed: !item.completed } : item
-    ));
+  const handleToggleComplete = async (todo: Todo) => {
+    try {
+      await updateTodo(todo.id, { done: !todo.done });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update todo');
+    }
   };
 
-  const deleteItem = (id: string) => {
+  const handleDeleteTodo = (todo: Todo) => {
     Alert.alert(
-      'Delete Item',
-      'Are you sure you want to delete this item?',
+      'Delete Todo',
+      `Are you sure you want to delete "${todo.text}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          setItems(items.filter(item => item.id !== id));
-        }},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteTodo(todo.id),
+        },
       ]
     );
   };
 
-  const renderItem = ({ item }: { item: ChecklistItem }) => (
+  const renderTodoItem = ({ item }: { item: Todo }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity
-        style={[styles.checkbox, item.completed && styles.checkboxCompleted]}
-        onPress={() => toggleItem(item.id)}
+        style={[styles.checkbox, item.done && styles.checkboxCompleted]}
+        onPress={() => handleToggleComplete(item)}
       >
-        {item.completed && <FontAwesome name="check" size={16} color="white" />}
+        {item.done && <FontAwesome name="check" size={16} color="white" />}
       </TouchableOpacity>
-      <Text style={[styles.itemText, item.completed && styles.itemTextCompleted]}>
+      <Text style={[styles.itemText, item.done && styles.itemTextCompleted]}>
         {item.text}
       </Text>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => deleteItem(item.id)}
+        onPress={() => handleDeleteTodo(item)}
       >
         <FontAwesome name="trash" size={18} color="#ff4444" />
       </TouchableOpacity>
     </View>
   );
 
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>My Todos</Text>
+        <Text style={styles.loginMessage}>Please log in to view your todos</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Checklist</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>My Todos</Text>
+        <TouchableOpacity style={styles.debugButton} onPress={handleDebug}>
+          <FontAwesome name="bug" size={16} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Add new task..."
-          value={newItemText}
-          onChangeText={setNewItemText}
-          onSubmitEditing={addItem}
+          placeholder="Add new todo..."
+          value={newTodoTitle}
+          onChangeText={setNewTodoTitle}
+          onSubmitEditing={handleAddTodo}
           returnKeyType="done"
         />
-        <TouchableOpacity style={styles.addButton} onPress={addItem}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddTodo}>
           <FontAwesome name="plus" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
+        data={todos}
+        renderItem={renderTodoItem}
+        keyExtractor={(item) => item.id}
         style={styles.list}
         showsVerticalScrollIndicator={false}
       />
 
       <View style={styles.stats}>
         <Text style={styles.statsText}>
-          {items.filter(item => item.completed).length} of {items.length} completed
+          {todos.filter(todo => todo.done).length} of {todos.length} completed
         </Text>
       </View>
+
+      {todos.length === 0 && (
+        <View style={styles.emptyState}>
+          <FontAwesome name="check-circle-o" size={64} color="#ccc" />
+          <Text style={styles.emptyText}>No todos yet</Text>
+          <Text style={styles.emptySubtext}>Add your first todo above</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -109,11 +150,20 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+  },
+  debugButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f0f0f0',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -185,5 +235,29 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: 16,
     color: '#666',
+  },
+  loginMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#9e9e9e',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#bdbdbd',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });

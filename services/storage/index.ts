@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage as AsyncStorage } from '../../lib/storage';
 
 class StorageService {
   // Generic storage methods
