@@ -1,10 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
-import { observable } from '@legendapp/state';
-import { syncedSupabase } from '@legendapp/state/sync-plugins/supabase';
+import { observable, syncedSupabase, configureSynced } from '@legendapp/state';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import { configureSynced } from '@legendapp/state/sync';
 import { ObservablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
