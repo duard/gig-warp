@@ -40,7 +40,9 @@ export const todos$ = observable(
     select: (from: any) =>
       from
         .select('id,counter,text,done,created_at,updated_at,deleted')
-        .order('updated_at', { ascending: false }),
+        .neq('deleted', true)          // skip deleted todos
+        .order('updated_at', { ascending: false }) // latest first
+        ,                   // optional limit
     actions: ['read', 'create', 'update', 'delete'],
     realtime: true,
     persist: {
@@ -55,6 +57,7 @@ export const todos$ = observable(
     // fieldDeleted: 'deleted',
   })
 );
+
 
 // Add a new todo
 export function addTodo(text: string) {
