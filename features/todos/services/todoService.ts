@@ -39,7 +39,7 @@ export const todos$ = observable(
     collection: 'todos',
     select: (from: any) =>
       from
-        .select('id,text,done,created_at,updated_at,deleted')
+        .select('id,counter,text,done,created_at,updated_at,deleted')
         .order('updated_at', { ascending: false }),
     actions: ['read', 'create', 'update', 'delete'],
     realtime: true,
@@ -52,7 +52,7 @@ export const todos$ = observable(
     },
     fieldCreatedAt: 'created_at',
     fieldUpdatedAt: 'updated_at',
-    fieldDeleted: 'deleted',
+    // fieldDeleted: 'deleted',
   })
 );
 
@@ -68,9 +68,11 @@ export function addTodo(text: string) {
   });
 }
 
-// Toggle the done status of a todo
 export function toggleDone(id: string) {
-  todos$[id].done.set((prev: boolean) => !prev);
+  const todo = todos$[id];
+  if (!todo) return;
+
+  todo.done.set((prev: boolean) => !prev);
 }
 
 // Soft delete a todo by setting deleted to true
@@ -86,4 +88,22 @@ export function hardDeleteTodo(id: string) {
 // Restore a soft-deleted todo
 export function restoreTodo(id: string) {
   todos$[id].deleted.set(false);
+}
+
+// Update a todo's text
+export function updateTodo(id: string, data: { text: string }) {
+  todos$[id].assign(data);
+}
+
+export function testSupabaseRealtime() {
+  supabase
+    .channel('todos-changes')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'todos' },
+      (payload) => {
+        console.log('Realtime change from Supabase:', payload);
+      }
+    )
+    .subscribe();
 }

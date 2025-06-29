@@ -2,12 +2,11 @@ import { useState } from 'react';
 import {
   FlatList,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
-  View,
   Alert,
 } from 'react-native';
+import { Text, View, useThemeColor } from '@/components/Themed';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { observer } from '@legendapp/state/react';
 import { Tables } from '../../../types/database';
@@ -25,6 +24,9 @@ const DELETE_ICON = String.fromCodePoint(0x1f5d1);
 
 const NewTodo = () => {
   const [text, setText] = useState('');
+  const inputBorderColor = useThemeColor({}, 'tabIconDefault');
+  const inputTextColor = useThemeColor({}, 'text');
+
   const handleSubmitEditing = ({ nativeEvent: { text } }: { nativeEvent: { text: string } }) => {
     if (text.trim()) {
       setText('');
@@ -37,7 +39,8 @@ const NewTodo = () => {
       onChangeText={(text) => setText(text)}
       onSubmitEditing={handleSubmitEditing}
       placeholder="What needs to be done?"
-      style={styles.input}
+      style={[styles.input, { borderColor: inputBorderColor, color: inputTextColor }]} // Apply themed colors
+      placeholderTextColor={inputTextColor} // Apply themed color for placeholder
     />
   );
 };
@@ -71,18 +74,26 @@ const Todo = ({ todo }: { todo: Tables<'todos'> }) => {
     );
   };
 
+  const todoBackgroundColor = useThemeColor({}, 'background');
+  const doneBackgroundColor = useThemeColor({ light: '#dfd', dark: '#224422' }, 'background');
+  const deleteButtonBackgroundColor = useThemeColor({ light: '#ff4444', dark: '#880000' }, 'tint');
+  const deleteButtonTextColor = useThemeColor({}, 'text');
+
   return (
     <View style={styles.todoContainer}>
       <TouchableOpacity
         onPress={handleToggle}
-        style={[styles.todo, todo.done ? styles.done : null]}
+        style={[
+          styles.todo,
+          { backgroundColor: todo.done ? doneBackgroundColor : todoBackgroundColor },
+        ]}
       >
         <Text style={styles.todoText}>
           {todo.done ? DONE_ICON : NOT_DONE_ICON} {todo.text}
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-        <Text style={styles.deleteButtonText}>{DELETE_ICON}</Text>
+      <TouchableOpacity onPress={handleDelete} style={[styles.deleteButton, { backgroundColor: deleteButtonBackgroundColor }]}>
+        <Text style={[styles.deleteButtonText, { color: deleteButtonTextColor }]}>{DELETE_ICON}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -115,6 +126,9 @@ const ClearTodos = observer(() => {
     ? Object.values(todos).filter((todo): todo is Tables<'todos'> => !!todo && !todo.deleted)
     : [];
 
+  const clearButtonBackgroundColor = useThemeColor({ light: '#ff4444', dark: '#880000' }, 'tint');
+  const clearButtonTextColor = useThemeColor({}, 'text');
+
   const handleClearAll = () => {
     if (activeTodos.length > 0) {
       Alert.alert(
@@ -138,17 +152,20 @@ const ClearTodos = observer(() => {
   };
 
   return activeTodos.length > 0 ? (
-    <TouchableOpacity onPress={handleClearAll} style={styles.clearButton}>
-      <Text style={styles.clearButtonText}>Clear All</Text>
+    <TouchableOpacity onPress={handleClearAll} style={[styles.clearButton, { backgroundColor: clearButtonBackgroundColor }]}>
+      <Text style={[styles.clearButtonText, { color: clearButtonTextColor }]}>Clear All</Text>
     </TouchableOpacity>
   ) : null;
 });
 
 const TodosScreen = observer(() => {
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.heading}>Todos</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <Text style={[styles.heading, { color: textColor }]}>Todos</Text>
         <NewTodo />
         <ClearTodos />
         <Todos todos$={_todos$} />
@@ -156,6 +173,8 @@ const TodosScreen = observer(() => {
     </SafeAreaProvider>
   );
 });
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -170,7 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   input: {
-    borderColor: '#999',
+    borderColor: useThemeColor({}, 'tabIconDefault'),
     borderRadius: 8,
     borderWidth: 2,
     flex: 0,
@@ -178,6 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 16,
     fontSize: 20,
+    color: useThemeColor({}, 'text'),
   },
   todos: {
     flex: 1,
@@ -190,34 +210,35 @@ const styles = StyleSheet.create({
   todo: {
     borderRadius: 8,
     padding: 16,
-    backgroundColor: '#ffd',
+    backgroundColor: useThemeColor({}, 'background'),
     flex: 1,
   },
   done: {
-    backgroundColor: '#dfd',
+    backgroundColor: useThemeColor({ light: '#dfd', dark: '#224422' }, 'background'),
   },
   todoText: {
     fontSize: 20,
+    color: useThemeColor({}, 'text'),
   },
   deleteButton: {
     marginLeft: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#ff4444',
+    backgroundColor: useThemeColor({ light: '#ff4444', dark: '#880000' }, 'tint'),
   },
   deleteButtonText: {
-    color: 'white',
+    color: useThemeColor({}, 'text'),
     fontSize: 20,
   },
   clearButton: {
-    backgroundColor: '#ff4444',
+    backgroundColor: useThemeColor({ light: '#ff4444', dark: '#880000' }, 'tint'),
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
     alignItems: 'center',
   },
   clearButtonText: {
-    color: 'white',
+    color: useThemeColor({}, 'text'),
     fontSize: 16,
     fontWeight: 'bold',
   },
