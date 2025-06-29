@@ -40,7 +40,7 @@ class StorageService {
     }
   }
 
-  async getAllKeys(): Promise<string[]> {
+  async getAllKeys(): Promise<readonly string[]> {
     try {
       return await AsyncStorage.getAllKeys();
     } catch (error) {

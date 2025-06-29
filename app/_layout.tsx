@@ -11,6 +11,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { SupabaseProvider, useSupabase } from '@/providers/SupabaseProvider';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -54,6 +55,8 @@ function AuthenticatedLayout() {
   
   // Use the auth redirect hook
   useAuthRedirect();
+
+  
 
   if (loading) {
     return (

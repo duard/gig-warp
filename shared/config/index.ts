@@ -31,7 +31,7 @@ export const config = {
   // Validation helpers
   validation: {
     isValidSupabaseConfig(): boolean {
-      return !!(this.supabase.url && this.supabase.anonKey);
+      return !!(config.supabase.url && config.supabase.anonKey);
     },
     
     getRequiredEnvVar(key: string): string {

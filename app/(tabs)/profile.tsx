@@ -10,7 +10,7 @@ export default function ProfileScreen() {
 
   const handleEditProfile = () => {
     // Navigate to edit profile screen
-    router.push('/users');
+    router.push('/features/users');
   };
 
   const handleSignOut = () => {

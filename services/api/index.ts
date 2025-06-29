@@ -9,7 +9,7 @@ class ApiService {
   }
 
   // Generic HTTP methods
-  async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T[]>> {
     try {
       const { data, error } = await supabase
         .from(endpoint)
@@ -19,7 +19,7 @@ class ApiService {
       if (error) throw error;
 
       return {
-        data,
+        data: data as T[],
         error: null,
         success: true,
       };

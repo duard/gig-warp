@@ -30,6 +30,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
@@ -52,6 +53,7 @@ export default function TabLayout() {
         name="todos"
         options={{
           title: 'Todos',
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         }}
       />
@@ -59,6 +61,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />

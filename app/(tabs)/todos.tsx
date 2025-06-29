@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -9,44 +9,18 @@ import {
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { useObservable, observer } from '@legendapp/state/react';
+import { observer } from '@legendapp/state/react';
 
 import {
   todos$,
   addTodo,
   toggleDone,
   hardDeleteTodo,
-  testSupabaseRealtime,
 } from '@/features/todos/services/todoService';
-import { debugSupabaseConnection } from '@/utils/debugSupabase';
 import { Todo } from '@/features/todos/types';
 
-function TodosScreenComponent() {
-  const todos = useObservable(todos$);
+function ChecklistScreenComponent() {
   const [newTodoTitle, setNewTodoTitle] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log('Todos screen focused');
-      debugSupabaseConnection();
-      testSupabaseRealtime();
-
-      const timeout = setTimeout(() => {
-        setLoading(false);
-        console.log('todos.get()', todos.get());
-      }, 500);
-
-      return () => clearTimeout(timeout);
-    }, [todos])
-  );
-
-  useEffect(() => {
-    if (loading && Object.keys(todos.get() || {}).length > 0) {
-      setLoading(false);
-    }
-  }, [todos, loading]);
 
   const handleAddTodo = () => {
     if (newTodoTitle.trim()) {
@@ -94,9 +68,9 @@ function TodosScreenComponent() {
     </View>
   );
 
-  const todosArray = Object.values(todos.get() || {}).filter(Boolean) as Todo[];
+  const todosArray = todos$.get() ? Object.values(todos$.get()).filter(Boolean) as Todo[] : [];
 
-  if (loading) {
+  if (todos$.loading.get()) {
     return (
       <View style={[styles.container, styles.center]}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -108,7 +82,7 @@ function TodosScreenComponent() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Todos</Text>
+        <Text style={styles.title}>My Checklist</Text>
       </View>
 
       <View style={styles.inputContainer}>
@@ -150,7 +124,7 @@ function TodosScreenComponent() {
   );
 }
 
-export default observer(TodosScreenComponent);
+export default observer(ChecklistScreenComponent);
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },

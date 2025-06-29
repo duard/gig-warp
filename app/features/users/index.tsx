@@ -171,21 +171,6 @@ export default function UserManagementScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <FontAwesome name="arrow-left" size={20} color="#007AFF" />
-        </TouchableOpacity>
-        <Text style={styles.title}>User Management</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={openCreateModal}
-        >
-          <FontAwesome name="plus" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
 
       {loading ? (
         <View style={styles.centerContainer}>
@@ -287,34 +272,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  addButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   centerContainer: {
     flex: 1,
