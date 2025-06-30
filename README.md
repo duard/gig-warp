@@ -143,3 +143,10 @@ To use Supabase:
 ---
 
 Built with ❤️ using Expo and React Native
+
+
+git config --global user.name "Carlos Aquino"
+git config --global user.email duard.js@gmail.com 
+git config --global pull.ff only
+git config --global credential.helper cache
+git config --global credential.helper 'cache --timeout=293600'
