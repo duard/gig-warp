@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { answerService } from '../../features/answers/services/answerService';
 import { Answer } from '../../features/answers/types';
 
 export default function AnswersScreen() {
+  const { response_id } = useLocalSearchParams();
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +28,14 @@ export default function AnswersScreen() {
 
   const fetchAnswers = async () => {
     try {
-      const data = await answerService.getAllAnswers();
+      let data;
+      if (response_id) {
+        // Assuming a service method to get answers by response_id exists or can be filtered client-side
+        const allAnswers = await answerService.getAllAnswers();
+        data = allAnswers.filter(answer => answer.response_id === response_id);
+      } else {
+        data = await answerService.getAllAnswers();
+      }
       setAnswers(data);
     } catch (error) {
       console.error('Error fetching answers:', error);

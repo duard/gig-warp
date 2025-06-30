@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { approvalService } from '../../features/approvals/services/approvalService';
 import { Approval } from '../../features/approvals/types';
 
 export default function ApprovalsScreen() {
+  const { response_id } = useLocalSearchParams();
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -24,7 +26,13 @@ export default function ApprovalsScreen() {
 
   const fetchApprovals = async () => {
     try {
-      const data = await approvalService.getAllApprovals();
+      let data;
+      if (response_id) {
+        const allApprovals = await approvalService.getAllApprovals();
+        data = allApprovals.filter(approval => approval.response_id === response_id);
+      } else {
+        data = await approvalService.getAllApprovals();
+      }
       setApprovals(data);
     } catch (error) {
       console.error('Error fetching approvals:', error);

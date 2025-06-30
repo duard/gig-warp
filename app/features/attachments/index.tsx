@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { attachmentService } from '../../features/attachments/services/attachmentService';
 import { Attachment } from '../../features/attachments/types';
 
 export default function AttachmentsScreen() {
+  const { file_id } = useLocalSearchParams();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAttachment, setEditingAttachment] = useState<Attachment | null>(null);
@@ -24,7 +27,13 @@ export default function AttachmentsScreen() {
 
   const fetchAttachments = async () => {
     try {
-      const data = await attachmentService.getAllAttachments();
+      let data;
+      if (file_id) {
+        const allAttachments = await attachmentService.getAllAttachments();
+        data = allAttachments.filter(attachment => attachment.file_id === file_id);
+      } else {
+        data = await attachmentService.getAllAttachments();
+      }
       setAttachments(data);
     } catch (error) {
       console.error('Error fetching attachments:', error);

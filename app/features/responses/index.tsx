@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { responseService } from '../../features/responses/services/responseService';
 import { Response } from '../../features/responses/types';
 
@@ -151,6 +152,12 @@ export default function ResponsesScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteResponse(item.id)} style={styles.actionButton}>
                 <FontAwesome name="trash" size={20} color="#FF3B30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/features/answers?response_id=${item.id}`)} style={styles.actionButton}>
+                <FontAwesome name="check-square" size={20} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/features/approvals?response_id=${item.id}`)} style={styles.actionButton}>
+                <FontAwesome name="thumbs-up" size={20} color="#007AFF" />
               </TouchableOpacity>
             </View>
           </View>

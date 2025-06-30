@@ -11,6 +11,14 @@ export default function HomeScreen() {
         <View style={styles.featuresContainer}>
           <TouchableOpacity 
             style={styles.featureButton}
+            onPress={() => router.push('/features/checklist-manager' as any)}
+          >
+            <FontAwesome name="list-alt" size={24} color="white" />
+            <Text style={styles.featureButtonText}>Checklist Manager</Text>
+            <Text style={styles.featureButtonSubtext}>Manage all Checklist-related Modules</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.featureButton}
             onPress={() => router.push('/features/users')}
           >
             <FontAwesome name="users" size={24} color="white" />
@@ -80,88 +88,6 @@ export default function HomeScreen() {
             <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Táxi Interno</Text>
             <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Solicitar Táxi</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.featureButton}
-            onPress={() => router.push('/features/status-types')}
-          >
-            <FontAwesome name="info-circle" size={24} color="white" />
-            <Text style={styles.featureButtonText}>Status Types</Text>
-            <Text style={styles.featureButtonSubtext}>Manage Status Definitions</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.featureButton, styles.secondaryButton]}
-            onPress={() => router.push('/features/answer-types')}
-          >
-            <FontAwesome name="question-circle" size={24} color="#007AFF" />
-            <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Answer Types</Text>
-            <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Define Question Answer Types</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.featureButton}
-            onPress={() => router.push('/features/task-lists')}
-          >
-            <FontAwesome name="tasks" size={24} color="white" />
-            <Text style={styles.featureButtonText}>Task Lists</Text>
-            <Text style={styles.featureButtonSubtext}>Manage Task Definitions</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.featureButton, styles.secondaryButton]}
-            onPress={() => router.push('/features/questions')}
-          >
-            <FontAwesome name="question-circle" size={24} color="#007AFF" />
-            <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Questions</Text>
-            <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Manage Questions</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.featureButton}
-            onPress={() => router.push('/features/responses')}
-          >
-            <FontAwesome name="reply-all" size={24} color="white" />
-            <Text style={styles.featureButtonText}>Responses</Text>
-            <Text style={styles.featureButtonSubtext}>View User Responses</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.featureButton, styles.secondaryButton]}
-            onPress={() => router.push('/features/answers')}
-          >
-            <FontAwesome name="check-square" size={24} color="#007AFF" />
-            <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Answers</Text>
-            <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Manage Question Answers</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.featureButton}
-            onPress={() => router.push('/features/files')}
-          >
-            <FontAwesome name="file" size={24} color="white" />
-            <Text style={styles.featureButtonText}>Files</Text>
-            <Text style={styles.featureButtonSubtext}>Manage Files</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.featureButton, styles.secondaryButton]}
-            onPress={() => router.push('/features/approvals')}
-          >
-            <FontAwesome name="thumbs-up" size={24} color="#007AFF" />
-            <Text style={[styles.featureButtonText, styles.secondaryButtonText]}>Approvals</Text>
-            <Text style={[styles.featureButtonSubtext, styles.secondaryButtonSubtext]}>Manage Approvals</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.featureButton}
-            onPress={() => router.push('/features/comments')}
-          >
-            <FontAwesome name="comments" size={24} color="white" />
-            <Text style={styles.featureButtonText}>Comments</Text>
-            <Text style={styles.featureButtonSubtext}>Manage Comments</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity 
             style={[styles.featureButton, styles.secondaryButton]}
             onPress={() => router.push('/features/external-users')}

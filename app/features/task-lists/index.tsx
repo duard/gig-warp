@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { taskListService } from '../../features/task-lists/services/taskListService';
 import { TaskList } from '../../features/task-lists/types';
 
@@ -135,6 +136,12 @@ export default function TaskListsScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteTaskList(item.id)} style={styles.actionButton}>
                 <FontAwesome name="trash" size={20} color="#FF3B30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/features/questions?task_list_id=${item.id}`)} style={styles.actionButton}>
+                <FontAwesome name="question" size={20} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/features/responses?task_list_id=${item.id}`)} style={styles.actionButton}>
+                <FontAwesome name="reply-all" size={20} color="#007AFF" />
               </TouchableOpacity>
             </View>
           </View>
