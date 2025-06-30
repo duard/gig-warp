@@ -1,7 +1,7 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
+    "strict": true, // Minor change to force re-check // Minor change to force re-check // Minor change to force re-check // Minor change to force re-check // Minor change to force re-check
     "baseUrl": ".",
     "paths": {
       "@/*": [

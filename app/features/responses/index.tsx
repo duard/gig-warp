@@ -3,11 +3,162 @@ import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextI
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { taskListService } from '@/features/task-lists/services/taskListService';
+import { statusTypeService } from '@/features/status-types/services/statusTypeService';
 import { responseService } from '../../features/responses/services/responseService';
 import { Response } from '../../features/responses/types';
 
+// Inlined SearchableSelect component
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface SearchableSelectProps {
+  options: Option[];
+  onSelect: (value: string) => void;
+  selectedValue: string;
+  placeholder?: string;
+  label?: string;
+}
+
+function SearchableSelect({
+  options,
+  onSelect,
+  selectedValue,
+  placeholder,
+  label,
+}: SearchableSelectProps) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
+
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const handleSelect = (value: string) => {
+    onSelect(value);
+    setModalVisible(false);
+    setSearchText('');
+  };
+
+  const displayLabel = selectedValue
+    ? options.find((opt) => opt.value === selectedValue)?.label || selectedValue
+    : '';
+
+  return (
+    <View style={searchableSelectStyles.container}>
+      {label && <Text style={searchableSelectStyles.label}>{label}</Text>}
+      <TouchableOpacity style={searchableSelectStyles.inputContainer} onPress={() => setModalVisible(true)}>
+        <TextInput
+          style={searchableSelectStyles.input}
+          placeholder={placeholder}
+          value={displayLabel}
+          editable={false} // Make it non-editable to force selection via modal
+        />
+        <FontAwesome name="chevron-down" size={16} color="#666" />
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={searchableSelectStyles.modalContent}>
+          <View style={searchableSelectStyles.modalHeader}>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={searchableSelectStyles.closeButton}>
+              <FontAwesome name="times" size={24} color="#007AFF" />
+            </TouchableOpacity>
+            <Text style={searchableSelectStyles.modalTitle}>{label || placeholder || 'Select an Option'}</Text>
+          </View>
+          <TextInput
+            style={searchableSelectStyles.searchInput}
+            placeholder="Search..."
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <FlatList
+            data={filteredOptions}
+            keyExtractor={(item) => item.value}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={searchableSelectStyles.optionItem}
+                onPress={() => handleSelect(item.value)}
+              >
+                <Text style={searchableSelectStyles.optionText}>{item.label}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const searchableSelectStyles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: 'white',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  closeButton: {
+    padding: 5,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 16,
+    backgroundColor: 'white',
+  },
+  optionItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: 'white',
+  },
+  optionText: {
+    fontSize: 16,
+  },
+});
+
 export default function ResponsesScreen() {
   const [responses, setResponses] = useState<Response[]>([]);
+  const [taskLists, setTaskLists] = useState<any[]>([]);
+  const [statusTypes, setStatusTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingResponse, setEditingResponse] = useState<Response | null>(null);
@@ -23,8 +174,32 @@ export default function ResponsesScreen() {
   });
 
   useEffect(() => {
-    fetchResponses();
+    const fetchData = async () => {
+      await fetchResponses();
+      await fetchTaskLists();
+      await fetchStatusTypes();
+      setLoading(false);
+    };
+    fetchData();
   }, []);
+
+  const fetchTaskLists = async () => {
+    try {
+      const data = await taskListService.getAllTaskLists();
+      setTaskLists(data);
+    } catch (error) {
+      console.error('Error fetching task lists:', error);
+    }
+  };
+
+  const fetchStatusTypes = async () => {
+    try {
+      const data = await statusTypeService.getAllStatusTypes();
+      setStatusTypes(data);
+    } catch (error) {
+      console.error('Error fetching status types:', error);
+    }
+  };
 
   const fetchResponses = async () => {
     try {
@@ -182,11 +357,11 @@ export default function ResponsesScreen() {
           </View>
           <View style={styles.modalContent}>
             <Text style={styles.label}>Task List ID:</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.task_list_id}
-              onChangeText={(text) => setFormData({ ...formData, task_list_id: text })}
-              placeholder="Task List ID"
+            <SearchableSelect
+              options={taskLists.map(tl => ({ label: tl.name, value: tl.id }))}
+              onSelect={(value) => setFormData({ ...formData, task_list_id: value })}
+              selectedValue={formData.task_list_id}
+              placeholder="Select Task List"
             />
             <Text style={styles.label}>User ID:</Text>
             <TextInput
@@ -210,11 +385,11 @@ export default function ResponsesScreen() {
               placeholder="Target ID"
             />
             <Text style={styles.label}>Status ID:</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.status_id}
-              onChangeText={(text) => setFormData({ ...formData, status_id: text })}
-              placeholder="Status ID"
+            <SearchableSelect
+              options={statusTypes.map(st => ({ label: st.name, value: st.id }))}
+              onSelect={(value) => setFormData({ ...formData, status_id: value })}
+              selectedValue={formData.status_id}
+              placeholder="Select Status Type"
             />
             <Text style={styles.label}>Completed At (ISO string):</Text>
             <TextInput
