@@ -3,10 +3,10 @@ import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Modal, TextI
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { taskListService } from '@/features/task-lists/services/taskListService';
-import { statusTypeService } from '@/features/status-types/services/statusTypeService';
-import { responseService } from '../../features/responses/services/responseService';
-import { Response } from '../../features/responses/types';
+import { taskListService } from '../task-lists/services/taskListService';
+import { statusTypeService } from '../status-types/services/statusTypeService';
+import { responseService } from './services/responseService';
+import { Response } from './types/types';
 
 // Inlined SearchableSelect component
 interface Option {
@@ -333,6 +333,9 @@ export default function ResponsesScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push(`/features/approvals?response_id=${item.id}`)} style={styles.actionButton}>
                 <FontAwesome name="thumbs-up" size={20} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/features/responses/answer-question?response_id=${item.id}&task_list_id=${item.task_list_id}`)} style={styles.actionButton}>
+                <FontAwesome name="question-circle" size={20} color="#007AFF" />
               </TouchableOpacity>
             </View>
           </View>
